@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Jamie Fest ✈️ Vegas Countdown</title>
+<meta name="color-scheme" content="dark light" />
+<style>
+  :root{
+    --pink:#ff43f6; --blue:#56f3ff; --gold:#ffd166; --ink:#0a0a16;
+    --glow: drop-shadow(0 0 10px rgba(86,243,255,.6)) drop-shadow(0 0 26px rgba(255,67,246,.45));
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:#fff; font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background:
+      radial-gradient(1200px 900px at 20% 15%, #331355 0%, transparent 55%),
+      radial-gradient(1200px 900px at 82% 88%, #0d3a52 0%, transparent 55%),
+      linear-gradient(180deg, #0c0b1f 0%, #0c1124 65%, #080816 100%);
+    overflow:hidden;
+  }
+
+  /* twinkling stars */
+  .stars{position:fixed; inset:0; z-index:0; pointer-events:none}
+  .star{position:absolute; width:2px; height:2px; background:#fff; border-radius:50%;
+        opacity:.9; animation:twinkle 2.2s infinite ease-in-out}
+  @keyframes twinkle{50%{opacity:.25; transform:scale(.6)}}
+
+  main{position:relative; z-index:2; display:grid; place-items:center; padding:24px; text-align:center}
+  h1{margin:6px 0 2px; font-weight:900; font-size:clamp(34px,7vw,64px);
+     color:#fff; filter:var(--glow);
+     text-shadow:0 0 8px var(--blue),0 0 22px var(--pink),0 0 40px var(--pink)}
+  .marquee{
+    display:inline-block; margin-top:6px; padding:8px 14px; border-radius:999px;
+    font-size:12px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+    color:#130f08; background:linear-gradient(90deg,var(--gold),#fff3b0,var(--gold));
+    border:1px solid #e6c76a; box-shadow:0 0 24px rgba(255,209,102,.35) inset;
+  }
+  .sub{margin-top:6px; color:#cfefff; opacity:.9}
+
+  .timer{margin-top:22px; display:grid; grid-template-columns:repeat(4,minmax(110px,1fr)); gap:14px; width:min(760px,92vw)}
+  .unit{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:14px; padding:16px}
+  .value{font-variant-numeric:tabular-nums; font-weight:900; font-size:clamp(34px,8.5vw,72px); line-height:1}
+  .label{text-transform:uppercase; letter-spacing:.12em; font-size:12px; color:rgba(255,255,255,.7)}
+
+  .meta{margin-top:10px; font-size:14px; color:#c9d6ff80}
+  .done{display:none; margin-top:16px; font-weight:800; color:#7effb2}
+
+  .bar{margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+  .btn{border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.12);
+       padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:800}
+  .btn.primary{background:linear-gradient(90deg,var(--pink),var(--blue)); color:#06141b; border-color:transparent}
+  .note{margin-top:8px; min-height:1.2em; font-size:13px; color:#c9d6ff99}
+
+  .controls{display:none; grid-template-columns:1.2fr 260px auto auto; gap:10px; margin-top:10px}
+  .controls input{width:100%; border:1px solid rgba(255,255,255,.22); border-radius:10px; padding:10px 12px; background:rgba(0,0,0,.25); color:inherit}
+  .opt{display:flex; align-items:center; gap:8px; margin-top:6px; justify-content:center; font-size:14px; color:#cfefffcc}
+
+  @media (max-width:720px){
+    .timer{grid-template-columns:repeat(2,1fr)}
+    .controls{grid-template-columns:1fr 1fr}
+    .controls .btn.primary{grid-column:span 2}
+    .controls .btn.share{grid-column:span 2}
+  }
+
+  /* skyline */
+  .skyline{position:fixed; inset:auto 0 0 0; height:210px; pointer-events:none; z-index:1}
+  .beam{fill:url(#beamGrad); opacity:.8; filter:drop-shadow(0 0 18px #7bf)}
+  .sign{fill:#111; stroke:#f7c96d; stroke-width:3}
+  .sign-text{font:700 18px/1 system-ui, sans-serif; fill:#fff; letter-spacing:.08em; text-transform:uppercase;
+             paint-order:stroke; stroke:#000; stroke-width:1; filter:var(--glow)}
+</style>
+</head>
+<body>
+  <!-- twinkling sky -->
+  <div class="stars" id="stars"></div>
+
+  <main role="region" aria-labelledby="title">
+    <div class="marquee">🛫The Final Countdown🛫</div>
+    <h1 id="title">Jamie Fest Countdown</h1>
+    <div class="sub">Flight 2996 • BNA → LAS • Dec 4 @ 12:30 PM (CST)</div>
+
+    <section class="timer" aria-live="polite" aria-atomic="true">
+      <div class="unit"><div id="days" class="value">0</div><div class="label">Days</div></div>
+      <div class="unit"><div id="hours" class="value">00</div><div class="label">Hours</div></div>
+      <div class="unit"><div id="mins" class="value">00</div><div class="label">Minutes</div></div>
+      <div class="unit"><div id="secs" class="value">00</div><div class="label">Seconds</div></div>
+    </section>
+
+    <div id="meta" class="meta"></div>
+    <div id="done" class="done">Wheels up — Jamie Fest time! 🎉</div>
+
+    <div class="bar">
+      <button id="shareBtn" class="btn primary">Copy link for friends</button>
+      <!--<button id="toggleEdit" class="btn">Edit title/time</button>
+      <button id="testCelebrate" class="btn">Test fireworks</button>-->
+    </div>
+
+    <div class="opt">
+      <label><input id="soundToggle" type="checkbox" checked /> Play “boarding” chime at zero</label>
+    </div>
+
+    <section id="editPanel" class="controls" aria-label="Countdown settings">
+      <input id="titleInput" type="text" placeholder="Event title" />
+      <input id="dateInput" type="datetime-local" />
+      <button id="applyBtn" class="btn primary" type="button">Apply</button>
+      <button id="copyBtn" class="btn share" type="button">Copy link</button>
+    </section>
+
+    <div id="note" class="note"></div>
+  </main>
+
+  <!-- skyline with Luxor beam + Strat -->
+
+ <!-- ▼▼ REPLACE your whole skyline SVG with this ▼▼ -->
+<svg class="skyline" viewBox="0 0 1200 210" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <!-- Luxor beam -->
+    <linearGradient id="beamGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#aef3ff00"/>
+      <stop offset=".55" stop-color="#bff6ff55"/>
+      <stop offset="1" stop-color="#e6fbffcc"/>
+    </linearGradient>
+
+    <!-- tiny helpers -->
+    <style>
+      .blk{fill:#0b0b14;stroke:#1e2140}
+      .win{fill:#ffd66a}
+      .dim{fill:#e6b85a;opacity:.6}
+      .signBoard{fill:#111323;stroke:#f7c96d;stroke-width:3;filter:url(#softGlow)}
+      .signTxt{font:800 16px/1 system-ui, sans-serif; text-transform:uppercase;
+               fill:#fff; letter-spacing:.1em; paint-order:stroke; stroke:#000; stroke-width:1}
+      .neonPink{fill:#ff43f6}
+      .neonBlue{fill:#56f3ff}
+      @keyframes beamPulse{0%,100%{opacity:.8} 50%{opacity:.35}}
+      @keyframes blink{0%,49%{opacity:1} 50%,100%{opacity:.25}}
+    </style>
+
+    <!-- airplane path across the sky -->
+    <path id="planePath" d="M -100,30 C 250,10 950,10 1300,35" fill="none"/>
+  </defs>
+
+  <!-- ground -->
+  <rect x="0" y="190" width="1200" height="20" fill="#05050a"/>
+
+
+  <!-- LUXOR ----------------------------------------------------------------->
+  <polygon points="280,190 460,36 640,190" class="blk"/>
+  <polygon points="440,36 480,36 540,0 380,0" fill="url(#beamGrad)" class="beam" style="animation:beamPulse 3.8s ease-in-out infinite; filter:url(#softGlow)"/>
+
+  <!-- MID STRIP ------------------------------------------------------------->
+  <!-- Hotel cluster with windows -->
+  <g>
+    <rect x="670" y="110" width="70" height="80" class="blk"/>
+    <rect x="682" y="122" width="8" height="8" class="win"/>
+    <rect x="698" y="122" width="8" height="8" class="dim"/>
+    <rect x="714" y="122" width="8" height="8" class="win"/>
+    <rect x="682" y="140" width="8" height="8" class="dim"/>
+    <rect x="698" y="140" width="8" height="8" class="win"/>
+    <rect x="714" y="140" width="8" height="8" class="dim"/>
+    <rect x="682" y="158" width="8" height="8" class="win"/>
+    <rect x="698" y="158" width="8" height="8" class="dim"/>
+    <rect x="714" y="158" width="8" height="8" class="win"/>
+  </g>
+
+  <g>
+    <rect x="750" y="118" width="60" height="72" class="blk"/>
+    <rect x="760" y="130" width="7" height="7" class="dim"/>
+    <rect x="774" y="130" width="7" height="7" class="win"/>
+    <rect x="788" y="130" width="7" height="7" class="dim"/>
+    <rect x="760" y="146" width="7" height="7" class="win"/>
+    <rect x="774" y="146" width="7" height="7" class="dim"/>
+    <rect x="788" y="146" width="7" height="7" class="win"/>
+  </g>
+
+  <!-- STRATOSPHERE ---------------------------------------------------------->
+  <rect x="880" y="66" width="10" height="124" class="blk"/>
+  <ellipse cx="885" cy="64" rx="28" ry="14" fill="#151532" stroke="#2a2a44"/>
+  <rect x="875" y="50" width="20" height="6" fill="#24244a"/>
+
+
+  <!-- “Jamie Fest” neon sign -->
+  <g filter="url(#neonGlow)">
+    <rect x="950" y="82" width="235" height="34" rx="9" class="signBoard"/>
+    <rect x="972" y="84" width="296" height="30" rx="8" fill="url(#bulbs)" opacity=".35"/>
+    <text class="signTxt" x="1070" y="105" text-anchor="middle">30th Birthday Bash!</text>
+  </g>
+
+  <!-- AIRPLANE -------------------------------------------------------------->
+  <g fill="#e6f7ff" opacity=".95">
+    <g>
+      <path d="M0,0 l10,6 l-6,0 l-3,4 l-1,-4 l-6,0 z" id="plane" />
+    </g>
+    <use href="#plane">
+      <animateMotion dur="18s" repeatCount="indefinite" rotate="auto">
+        <mpath href="#planePath"/>
+      </animateMotion>
+    </use>
+  </g>
+</svg>
+<!-- ▲▲ REPLACEMENT ENDS ▲▲ -->
+
+  <!-- celebration canvas -->
+  <canvas id="fx" style="position:fixed; inset:0; pointer-events:none; z-index:3"></canvas>
+
+<script>
+/* ---------- Time & sharing ---------- */
+const DEFAULT_TITLE = "🎲 Jamie Fest • Las Vegas 🎰";
+const DEFAULT_ISO_WITH_TZ = "2025-12-04T12:30:00-06:00"; // Nashville CST
+
+const params = new URLSearchParams(location.search);
+let title = params.get("title") || DEFAULT_TITLE;
+let target = new Date(params.get("ts") || DEFAULT_ISO_WITH_TZ);
+
+const $ = id => document.getElementById(id);
+const daysEl=$('days'), hoursEl=$('hours'), minsEl=$('mins'), secsEl=$('secs');
+const titleEl=$('title'), metaEl=$('meta'), doneEl=$('done'), noteEl=$('note');
+const titleInput=$('titleInput'), dateInput=$('dateInput');
+const shareBtn=$('shareBtn'); //, toggleEdit=$('toggleEdit');
+//const copyBtn=$('copyBtn'), applyBtn=$('applyBtn'), testBtn=$('testCelebrate');
+const soundToggle=$('soundToggle');
+
+function fmtLocal(d){ return new Intl.DateTimeFormat([], {dateStyle:"full", timeStyle:"long"}).format(d); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+function updateMeta(){
+  const utc = target.toISOString().replace(".000","").replace("T"," ").replace("Z"," UTC");
+  metaEl.textContent = `Target: ${fmtLocal(target)} • (${utc})`;
+}
+function updateInputs(){
+  titleEl.textContent = title || "Jamie Fest Countdown";
+  titleInput.value = title;
+  const d=target, p=n=>String(n).padStart(2,'0');
+  dateInput.value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function buildURL(){
+  const url = new URL(location.href.split("?")[0]);
+  if(title) url.searchParams.set("title", title);
+  url.searchParams.set("ts", target.toISOString());
+  return url.toString();
+}
+function copyLink(){
+  const link = buildURL();
+  navigator.clipboard.writeText(link).then(()=>{
+    noteEl.textContent="Link copied. Send to the crew 🎲";
+    setTimeout(()=>noteEl.textContent="",2200);
+  }).catch(()=>{ noteEl.textContent=link; });
+}
+shareBtn.addEventListener('click', copyLink);
+copyBtn.addEventListener('click', copyLink);
+//toggleEdit.addEventListener('click', ()=>{
+  //const p = $('editPanel');
+  //p.style.display = (p.style.display==='grid') ? 'none' : 'grid';
+//});
+applyBtn.addEventListener('click', ()=>{
+  const v = dateInput.value;
+  const t = titleInput.value.trim();
+  if(!v){ noteEl.textContent="Pick a date & time."; return; }
+  const dt = new Date(v);
+  if(isNaN(dt)){ noteEl.textContent="Time looks invalid."; return; }
+  target = dt; title = t || DEFAULT_TITLE; updateInputs(); updateMeta();
+  noteEl.textContent="Applied."; setTimeout(()=>noteEl.textContent="",1500);
+});
+
+/* ---------- Timer ---------- */
+let fired=false;
+function render(d,h,m,s){
+  daysEl.textContent=d; hoursEl.textContent=pad2(h); minsEl.textContent=pad2(m); secsEl.textContent=pad2(s);
+}
+function tick(){
+  const now=new Date(); const diff=target-now;
+  if (isNaN(diff)) return;
+  if (diff<=0){
+    render(0,0,0,0);
+    if(!fired){ celebrate(); if(soundToggle.checked) chime(); fired=true; }
+    doneEl.style.display='block'; return;
+  }
+  doneEl.style.display='none'; fired=false;
+  const tot=Math.floor(diff/1000);
+  const d=Math.floor(tot/86400), h=Math.floor((tot%86400)/3600), m=Math.floor((tot%3600)/60), s=tot%60;
+  render(d,h,m,s);
+}
+
+/* ---------- Stars ---------- */
+(function makeStars(){
+  const wrap = $('stars');
+  for(let i=0;i<130;i++){
+    const s=document.createElement('div'); s.className='star';
+    s.style.left=Math.random()*100+'vw'; s.style.top=Math.random()*100+'vh';
+    s.style.animationDelay=(Math.random()*2.2)+'s'; s.style.transform=`scale(${.5+Math.random()*1.2})`;
+    wrap.appendChild(s);
+  }
+})();
+
+/* ---------- Confetti + Fireworks ---------- */
+const canvas=$('fx'), ctx=canvas.getContext('2d'); let W,H;
+function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+addEventListener('resize', resize, {passive:true}); resize();
+
+let particles=[], rockets=[];
+function celebrate(){
+  confettiBurst(260);
+  for(let i=0;i<6;i++) setTimeout(()=>firework(Math.random()*W, H*0.65 - Math.random()*H*0.25), 300 + i*350);
+}
+//testBtn.addEventListener('click', celebrate);
+
+function confettiBurst(N=200){
+  for(let i=0;i<N;i++){
+    particles.push({
+      x: Math.random()*W, y: -20 - Math.random()*H*0.3,
+      vx: (Math.random()-0.5)*3, vy: 3+Math.random()*3,
+      size: 6+Math.random()*8, rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.2,
+      hue: Math.random()<.5 ? 300+Math.random()*60 : 170+Math.random()*40,
+      life: 200 + Math.random()*140, type:'confetti'
+    });
+  }
+}
+function firework(x,y){
+  const shards = 80;
+  for(let i=0;i<shards;i++){
+    const ang = (Math.PI*2*i)/shards, sp = 2+Math.random()*3;
+    particles.push({
+      x, y, vx: Math.cos(ang)*sp, vy: Math.sin(ang)*sp,
+      size: 3+Math.random()*3, hue: 0 + Math.random()*360,
+      life: 120+Math.random()*80, type:'spark'
+    });
+  }
+}
+(function loop(){
+  requestAnimationFrame(loop);
+  ctx.clearRect(0,0,W,H);
+  for(const p of particles){
+    p.life--; if(p.life<=0) continue;
+    // gravity
+    if(p.type==='confetti'){ p.vy += 0.03; }
+    else { p.vy += 0.015; }
+    p.x += p.vx; p.y += p.vy; p.rot && (p.rot += p.vr);
+
+    ctx.save();
+    ctx.translate(p.x,p.y); p.rot && ctx.rotate(p.rot);
+    if(p.type==='confetti'){
+      ctx.fillStyle=`hsl(${p.hue} 100% 60%)`;
+      ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size);
+    } else {
+      ctx.fillStyle=`hsl(${p.hue} 100% 65%)`;
+      ctx.beginPath(); ctx.arc(0,0,p.size/2,0,Math.PI*2); ctx.fill();
+      // small glow
+      ctx.globalAlpha=.3; ctx.beginPath(); ctx.arc(0,0,p.size,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1;
+    }
+    ctx.restore();
+  }
+  particles = particles.filter(p => p.life>0 && p.y<H+80 && p.x>-80 && p.x<W+80);
+})();
+
+/* ---------- Sound ---------- */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function chime(){
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  o.type="triangle"; o.frequency.setValueAtTime(880, audioCtx.currentTime);
+  g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.6, audioCtx.currentTime+0.02);
+  o.start();
+  // two-note boarding chime
+  setTimeout(()=>o.frequency.setValueAtTime(1318.51, audioCtx.currentTime), 180);
+  setTimeout(()=>{
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.6);
+    o.stop(audioCtx.currentTime+0.62);
+  }, 240);
+}
+
+/* ---------- Boot ---------- */
+updateInputs(); updateMeta(); tick(); setInterval(tick,1000);
+</script>
+</body>
+</html>
