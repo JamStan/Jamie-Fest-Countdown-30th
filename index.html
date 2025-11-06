@@ -71,39 +71,7 @@
   .sign{fill:#111; stroke:#f7c96d; stroke-width:3}
   .sign-text{font:700 18px/1 system-ui, sans-serif; fill:#fff; letter-spacing:.08em; text-transform:uppercase;
              paint-order:stroke; stroke:#000; stroke-width:1; filter:var(--glow)}
- 
-  /* --- Mobile layout polish --- */
-html, body { height: 100%; -webkit-text-size-adjust: 100%; }
-body { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
-
-/* Make title and timer fit cleaner on mobile */
-h1 { font-size: clamp(28px, 8vw, 64px); line-height: 1.1; }
-
-/* Timer grid: 4-up on desktop, 2-up on phones */
-.timer { grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 14px; }
-@media (max-width: 720px) {
-  .timer { grid-template-columns: repeat(2, minmax(130px, 1fr)); gap: 12px; }
-}
-
-/* Slightly smaller numbers on narrow phones */
-@media (max-width: 380px) {
-  .value { font-size: clamp(26px, 10vw, 56px); }
-}
-
-/* Buttons fit better on mobile */
-.bar .btn { padding: 10px 12px; font-size: 15px; border-radius: 12px; }
-.marquee { font-size: 11px; padding: 7px 12px; }
-
-/* Nudge skyline down a bit to avoid overlap on small screens */
-@media (max-width: 720px) {
-  .skyline { transform: translateY(6px); }
-}
-
-/* Optional: make "Copy link" full width on small screens */
-@media (max-width: 420px) {
-  .bar { justify-content: center; }
-  .bar .btn.primary { width: 100%; max-width: 360px; }
-}
+#meta { display: none; }
 </style>
 </head>
 <body>
@@ -111,7 +79,7 @@ h1 { font-size: clamp(28px, 8vw, 64px); line-height: 1.1; }
   <div class="stars" id="stars"></div>
 
   <main role="region" aria-labelledby="title">
-    <div class="marquee">🛫The Final Countdown🛫</div>
+    <div class="marquee">✈️The Final Countdown✈️</div>
     <h1 id="title">Jamie Fest Countdown</h1>
     <div class="sub">Flight 2996 • BNA → LAS • Dec 4 @ 12:30 PM (CST)</div>
 
@@ -131,9 +99,9 @@ h1 { font-size: clamp(28px, 8vw, 64px); line-height: 1.1; }
       <button id="testCelebrate" class="btn">Test fireworks</button>-->
     </div>
 
-    <div class="opt">
+    <!--<div class="opt">
       <label><input id="soundToggle" type="checkbox" checked /> Play “boarding” chime at zero</label>
-    </div>
+    </div>-->
 
     <section id="editPanel" class="controls" aria-label="Countdown settings">
       <input id="titleInput" type="text" placeholder="Event title" />
@@ -240,7 +208,7 @@ h1 { font-size: clamp(28px, 8vw, 64px); line-height: 1.1; }
 
 <script>
 /* ---------- Time & sharing ---------- */
-const DEFAULT_TITLE = "🎲 Jamie Fest • Las Vegas 🎰";
+const DEFAULT_TITLE = "🎉Jamie Fest🍾<br>🎲♦️Las Vegas♠️🎰";
 const DEFAULT_ISO_WITH_TZ = "2025-12-04T12:30:00-06:00"; // Nashville CST
 
 const params = new URLSearchParams(location.search);
@@ -263,7 +231,7 @@ function updateMeta(){
   metaEl.textContent = `Target: ${fmtLocal(target)} • (${utc})`;
 }
 function updateInputs(){
-  titleEl.textContent = title || "Jamie Fest Countdown";
+  titleEl.innerHTML = title || "Jamie Fest Countdown"; // <— allow <br>
   titleInput.value = title;
   const d=target, p=n=>String(n).padStart(2,'0');
   dateInput.value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
@@ -282,8 +250,8 @@ function copyLink(){
     setTimeout(()=>noteEl.textContent="",2200);
   }).catch(()=>{ noteEl.textContent=link; });
 }
-shareBtn.addEventListener('click', copyLink);
-copyBtn.addEventListener('click', copyLink);
+//shareBtn.addEventListener('click', copyLink);
+//copyBtn.addEventListener('click', copyLink);
 //toggleEdit.addEventListener('click', ()=>{
   //const p = $('editPanel');
   //p.style.display = (p.style.display==='grid') ? 'none' : 'grid';
@@ -412,4 +380,3 @@ updateInputs(); updateMeta(); tick(); setInterval(tick,1000);
 </script>
 </body>
 </html>
-
