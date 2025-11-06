@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Jamie Fest ✈️ Vegas Countdown</title>
 <meta name="color-scheme" content="dark light" />
 <style>
@@ -70,6 +71,39 @@
   .sign{fill:#111; stroke:#f7c96d; stroke-width:3}
   .sign-text{font:700 18px/1 system-ui, sans-serif; fill:#fff; letter-spacing:.08em; text-transform:uppercase;
              paint-order:stroke; stroke:#000; stroke-width:1; filter:var(--glow)}
+ 
+  /* --- Mobile layout polish --- */
+html, body { height: 100%; -webkit-text-size-adjust: 100%; }
+body { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+
+/* Make title and timer fit cleaner on mobile */
+h1 { font-size: clamp(28px, 8vw, 64px); line-height: 1.1; }
+
+/* Timer grid: 4-up on desktop, 2-up on phones */
+.timer { grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 14px; }
+@media (max-width: 720px) {
+  .timer { grid-template-columns: repeat(2, minmax(130px, 1fr)); gap: 12px; }
+}
+
+/* Slightly smaller numbers on narrow phones */
+@media (max-width: 380px) {
+  .value { font-size: clamp(26px, 10vw, 56px); }
+}
+
+/* Buttons fit better on mobile */
+.bar .btn { padding: 10px 12px; font-size: 15px; border-radius: 12px; }
+.marquee { font-size: 11px; padding: 7px 12px; }
+
+/* Nudge skyline down a bit to avoid overlap on small screens */
+@media (max-width: 720px) {
+  .skyline { transform: translateY(6px); }
+}
+
+/* Optional: make "Copy link" full width on small screens */
+@media (max-width: 420px) {
+  .bar { justify-content: center; }
+  .bar .btn.primary { width: 100%; max-width: 360px; }
+}
 </style>
 </head>
 <body>
@@ -378,3 +412,4 @@ updateInputs(); updateMeta(); tick(); setInterval(tick,1000);
 </script>
 </body>
 </html>
+
